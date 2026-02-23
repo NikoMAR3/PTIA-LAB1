@@ -1,4 +1,8 @@
-from abc import ABC
+from abc import ABC, abstractmethod
+
+import numpy as np
+import pandas as pd
+
 
 
 class Criterium(ABC):
@@ -7,33 +11,23 @@ class Criterium(ABC):
   """
   @classmethod
   def use(cls, name: str):
-    """ obtiene criterio de selección (OBJ) a partir del nombre
-    Args:
-      name  : nombre esperado del criterio
-    Returns:
-      objeto criterio de selección
-    """
-    pass
+    name = name.lower()
+    match name:
+      case "entropy":
+        from BaseFunctions.Entropy import Entropy
+        return Entropy()
 
+  @abstractmethod
   def impurity(self, V: pd.DataFrame) -> float:
-    """ computa la impureza en un nodo/vértice
-    Args:
-      V    : ejemplares para una característica
-    Returns:
-       valor de la impureza del nodo
-    """
     pass
 
-  def gain(self, a: str, X: pd.DataFrame, Y: [pd.DataFrame]) -> float:
-    """ computa la ganancia de información de un nodo con 1 o más hijos
-    Args:
-      a  : atributo/característica a evaluar
-      X : ejemplares / valores de entrada
-      Y : valores de salida esperados
-    Returns:
-      valor de la ganancia de información
-    """
-    pass
+  def gain(self, a: str, X: pd.DataFrame, Y: pd.Series) -> float:
+    h_padre = self.impurity(Y)
+    h_hijos = 0
+    for valor in X[a].unique():
+      subset = Y[X[a] == valor]
+      h_hijos += (len(subset) / len(Y)) * self.impurity(subset)
+    return h_padre - h_hijos
 
   def treeImpurity(self, nodes: [pd.DataFrame]) -> float:
     """ computa la impureza de todo un arbol
@@ -42,4 +36,9 @@ class Criterium(ABC):
     Returns:
       valor de la impureza del arbol
     """
-    pass
+    impurity = 0
+    total = sum(len(n) for n in nodes)
+    for n in nodes:
+      impurity += self.impurity(n) * (len(n) / total)
+    return impurity
+

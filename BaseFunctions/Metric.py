@@ -1,4 +1,9 @@
-from abc import ABC
+from abc import ABC, abstractmethod
+
+import pandas as pd
+
+
+
 
 
 class Metric(ABC):
@@ -6,15 +11,31 @@ class Metric(ABC):
   Representa una metrica de desempeño P para evaluar una tarea T
   """
   @classmethod
-  def use(cls,name: str):
-    """ obtiene metrica (OBJ) a partir del nombre
+  def use(cls, name: str):
+    from BaseFunctions.F1Score import F1Score
+    from BaseFunctions.Presicion import Precision
+    from BaseFunctions.Recall import Recall
+    from BaseFunctions.Accuracy import Accuracy
+    """ obtiene metrica (clase) a partir del nombre
     Args:
-      name  : nombre esperado de la metrica
+        name: nombre esperado de la metrica
     Returns:
-       objeto metrica
+        clase métrica correspondiente
     """
-    pass
+    match name:
+      case "F1Score":
+        return F1Score
+      case "Precision":
+        return Precision
+      case "Recall":
+        return Recall
+      case "Accuracy":
+        return Accuracy
+      case _:
+        raise ValueError(f"Métrica '{name}' no reconocida")
 
+
+  @abstractmethod
   def value(self, Y: pd.DataFrame, Yp: pd.DataFrame)->float:
     """ computa el desempeño P
     Args:
