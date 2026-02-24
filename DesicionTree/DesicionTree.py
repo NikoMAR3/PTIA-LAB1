@@ -1,4 +1,5 @@
 import pandas as pd
+from pandas import Series
 
 from BaseFunctions.Criterium import Criterium
 from BaseFunctions.Metric import Metric
@@ -25,7 +26,7 @@ class DecisionTree:
     """
     return self.metric_f1.value(Yp, Y)
 
-  def predict(self, X: pd.DataFrame) -> pd.DataFrame:
+  def predict(self, X: pd.DataFrame) -> Series:
     """ computa una serie de entradas a traves del arbol generando una predicción
     Args:
       X    : valores de características (entradas)
@@ -38,9 +39,14 @@ class DecisionTree:
         while "hoja" not in nodo:
             atributo = nodo["atributo"]
             valor = fila[atributo]
-            nodo = nodo["hijos"][valor]
+            if valor not in nodo["hijos"]:
+                nodo = list(nodo["hijos"].values())[0]
+            else:
+                nodo = nodo["hijos"][valor]
         resultados.append(nodo["hoja"])
     return pd.Series(resultados)
+
+
 
   def train(self, X: pd.DataFrame, Y: pd.DataFrame, print_impurity: bool, do_graphic: bool):
     """ construye y entrena el árbol de decisión a partir de unos ejemplares.
